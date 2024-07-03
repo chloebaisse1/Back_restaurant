@@ -5,6 +5,10 @@ namespace App\Controller;
     use App\Repository\RestaurantRepository;
     use DateTimeImmutable;
     use Doctrine\ORM\EntityManagerInterface;
+    use OpenApi\Attributes\MediaType;
+    use OpenApi\Attributes\Property;
+    use OpenApi\Attributes\RequestBody;
+    use OpenApi\Attributes\Schema;
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Component\HttpFoundation\JsonResponse;
     use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +17,7 @@ namespace App\Controller;
     use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
     use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
     use Symfony\Component\Serializer\SerializerInterface;
+    use OpenApi\Attributes as OA;
 
 
     #[Route('api/restaurant', name: 'app_api_restaurant_')]
@@ -27,6 +32,33 @@ class RestaurantController extends AbstractController
     }
 
     #[Route(methods: ['POST'])]
+    #[OA\Post(
+        path:"/api/restaurant",
+        summary:"Créer un restaurant",
+        tags: ["Restaurant"],
+        requestBody:
+        new RequestBody(
+            required: true,
+            description: "Données du restaurant à créer",
+            content:
+            [new MediaType(
+                mediaType: "application/json",
+                schema:
+            new Schema(
+                type: "object",
+                properties:
+                [new Property(
+                    property: "name",
+                    type: "string",
+                    example: "Nom du restaurant"
+                ),
+                    new Property(
+                        property: "description",
+                        type: "string",
+                        example: "description du restaurant"
+    )]))]
+    ),
+    )]
     public function new(Request $request): JsonResponse
     {
         $restaurant = $this->serializer->deserialize($request->getContent(), Restaurant::class, 'json');
@@ -46,6 +78,13 @@ class RestaurantController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[OA\Get(
+        path:"/api/restaurant/{id}",
+        summary:"Afficher un restaurant par son ID",
+        tags: ["Restaurant"]
+    )]
+
+
     public function show(int $id): JsonResponse
     {
         $restaurant = $this->repository->findOneBy(['id' => $id]);
